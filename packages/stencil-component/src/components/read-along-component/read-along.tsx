@@ -428,6 +428,24 @@ export class ReadAlongComponent {
 
   }
 
+  toggleSettings(): void {
+    if (this.playing) {
+      this.playing = false
+      this.audio_howl_sprites.sound.pause()
+    } else if (this.current_page) {
+      setTimeout(() => {
+
+        this.playing = true
+        this.audio_howl_sprites.sound.play()
+      }, 100)
+    }
+    this.el.shadowRoot.querySelector('.pages__container').classList.toggle('settings-is-visible')
+    this.el.shadowRoot.querySelector('.overlay__container').classList.toggle('settings-is-visible')
+    this.el.shadowRoot.querySelector('.control-panel').classList.toggle('settings-is-visible')
+    this.el.shadowRoot.querySelector('#settings').classList.toggle('is-visible')
+
+  }
+
   toggleScrollBehavior(): void {
     this.scrollBehavior = this.scrollBehavior === "auto" ? "smooth" : "auto"
 
@@ -1302,6 +1320,12 @@ export class ReadAlongComponent {
     <i class="material-icons-outlined">subtitles</i>
   </button>
 
+  ToggleSettings = (): Element => <button data-cy={"settings-button"} title={"Change Configuration"}
+                                          onClick={() => this.toggleSettings()}
+                                          class={"control-panel__control ripple theme--" + this.theme + " background--" + this.theme}>
+    <i class="material-icons" aria-label="Show settings">settings</i>
+  </button>
+
   ErrorMessage = (props: {msg: string, data_cy: string}): Element =>  <p data-cy={props.data_cy} class="alert status-error"><span class="material-icons">error_outline_outlined</span>{props.msg}</p>
 
   ControlPanel = (): Element => <div data-cy="control-panel"
@@ -1318,10 +1342,50 @@ export class ReadAlongComponent {
     </div>
 
     <div class="control-panel__buttons--right">
+      <this.ToggleSettings/>
       {this.hasTextTranslations && <this.TextTranslationDisplayControl/>}
       <this.StyleControl/>
       <this.FullScreenControl/>
     </div>
+  </div>
+
+  Settings = (): Element => <div id={"settings"} data-cy={"settings"} class={"settings"}>
+    <button class={"close"} onClick={() => {
+      this.toggleSettings()
+    }}>&times; </button>
+    <h3>{this.returnTranslation('Settings')}</h3>
+    <p>
+      <label class={"switch"}>
+        <input type="checkbox" data-cy={"settings-scroll-behavior"} checked={this.scrollBehavior === "smooth"}
+               onClick={() => {
+                 this.toggleScrollBehavior();
+
+               }}/>
+        <span class="slider"></span>
+
+      </label>
+      {this.returnTranslation('Page Animation')}
+    </p>
+    <p>
+      <label class={"switch"}>
+        <input type="checkbox" data-cy={"settings-auto-pause"} checked={!this.autoPauseEndOfPage}
+               onClick={() => {
+                 this.autoPauseEndOfPage = !this.autoPauseEndOfPage;
+
+               }}/>
+        <span class="slider"></span>
+
+      </label>
+      {this.returnTranslation('Auto turn page')}
+    </p>
+    {!this.autoPauseEndOfPage &&
+      <p>
+        <input data-cy={"settings-pause-timeout"}
+               onChange={e => this.timeoutAtEndOfPage = parseFloat((e.target as HTMLInputElement).value)}
+               type={"number"} size={1} step={0.5} min={0} max={10} value={this.timeoutAtEndOfPage}/>
+        {this.returnTranslation('End of page pause in seconds')}
+      </p>
+    }
   </div>
 
   /**
@@ -1357,6 +1421,7 @@ export class ReadAlongComponent {
           )}
 
         </div>
+        <this.Settings/>
         {this.hasLoaded < 3 && <div class="loader"/>}
         {this.assetsStatus.SMIL == LOADED &&
           <div onClick={(e) => this.goToSeekFromProgress(e)} id='all' data-cy="progress-bar"
