@@ -57,7 +57,7 @@ $max-height: 98vh;
       @extend %themed-bg;
       img {
         height: 100%;
-        max-width: 95%;
+        max-width: $page-size; /* fixed image height to page height */
         object-fit: contain;
       }
     }
