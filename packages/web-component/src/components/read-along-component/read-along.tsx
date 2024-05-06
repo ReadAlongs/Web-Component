@@ -1650,7 +1650,11 @@ export class ReadAlongComponent {
   PlayControl = (): Element => (
     <button
       data-cy="play-button"
-      disabled={this.hasLoaded < 2}
+      disabled={
+        this.assetsStatus.AUDIO !== LOADED &&
+        this.assetsStatus.RAS !== LOADED &&
+        this.audio_howl_sprites === undefined
+      }
       aria-label="Play"
       title={this.getI18nString("play-tooltip")}
       onClick={() => {
