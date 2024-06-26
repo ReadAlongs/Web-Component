@@ -5,7 +5,7 @@ on:
       - main
       - dev.ej/windows-ci
 jobs:
-  test-suites:
+  tests-on-windows:
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - run: npm install --verbose
       - name: Ng test for studio-web
         run: |
           npx nx build web-component
@@ -37,14 +37,7 @@ jobs:
       - run: npx nx build web-component
         continue-on-error: true
       - run: npx nx bundle web-component
+        shell: bash
         continue-on-error: true
       - run: npx nx build ngx-web-component
         continue-on-error: true
-      - name: exercise nx commands we use
-        continue-on-error: true
-        run: |
-          npx nx extract-i18n studio-web
-          npx nx check-l10n studio-web
-          npx nx build web-component
-          npx nx bundle web-component
-          npx nx build ngx-web-component
