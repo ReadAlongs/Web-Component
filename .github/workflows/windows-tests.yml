@@ -1,0 +1,36 @@
+name: Run tests on Windows
+on:
+  push:
+    branches:
+      - main
+      - dev.ej/windows-ci
+jobs:
+  test-suites:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Ng test for studio-web
+        run: |
+          npx nx build web-component
+          npx nx test:once studio-web
+      - name: Cypress run for web-component
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          start: |
+            npx nx serve web-component
+            npx nx serve-test-data web-component
+          wait-on: "http://localhost:3333/build/web-component.esm.js"
+          command: npx nx test:once web-component
+      - name: exercise nx commands we use
+        run: |
+          npx nx extract-i18n studio-web
+          npx nx check-l10n studio-web
+          npx nx build web-component
+          npx nx bundle web-component
+          npx nx build ngx-web-component
